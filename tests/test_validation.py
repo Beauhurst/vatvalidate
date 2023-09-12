@@ -128,6 +128,12 @@ def test_modulus9755(vat_digits: list[int], expected_validity: bool) -> None:
         ("GB137354608", False),
         ("GB834204846", False),
         ("GB268959823", False),
+        # Invalid VAT numbers (too long)
+        ("GB2834204846", False),
+        ("GB27368959823", False),
+        ("800451425000", False),
+        ("GB 1373 005 46 08", False),
+        ("GB849680863000", False),
         # Invalid VAT numbers (too short)
         ("GB15827200", False),
         ("GB1783052", False),
