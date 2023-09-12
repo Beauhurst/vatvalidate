@@ -1,0 +1,35 @@
+name: Continuous Integration
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    continue-on-error: ${{ matrix.experimental }}
+    name: "Build and Test on ${{ matrix.python-version }}, experimental: ${{ matrix.experimental }}"
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.8","3.9", "3.10", "3.11"]
+        experimental: [false]
+        # include:
+        #   - python-version: "3.12"
+        #     experimental: true
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dev dependencies
+        run: |
+          python -m pip install --upgrade pip setuptools poetry
+          poetry install --with dev
+
+      - name: Run Tests
+        run: poetry run ./run-tests.sh
