@@ -1,0 +1,52 @@
+# Compiled python modules.
+*.pyc
+
+# Distribution / packaging
+/dist/
+/build/
+*.egg-info/
+MANIFEST
+build/
+
+# Python egg metadata, regenerated from source files by setuptools.
+/*.egg-info
+
+# Coverage reports
+/htmlcov
+.coverage
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+
+# Venvs
+/venv*
+.envrc
+.env
+.venv
+env/
+ENV/
+env.bak/
+venv.bak/
+.direnv
+
+# Misc
+run.py
+todo.txt
+.tox
+files.txt
+.vscode
+.idea/
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+.tox/
+coverage.xml
+.pytest_cache/
+.mypy_cache
+.ruff_cache
+
+# osx crap
+.DS_Store
