@@ -28,7 +28,7 @@ jobs:
 
       - name: Install dev dependencies
         run: |
-          python -m pip install --upgrade pip setuptools poetry
+          pipx install poetry
           poetry install --with dev
 
       - name: Run Tests
