@@ -3,28 +3,26 @@ from math import ceil
 from vatvalidate.exceptions import InvalidVATDigitsError
 
 
-def _modulus_9755(vat_digits: list[int], use_9755: bool = False) -> bool:
+def _modulus_9755(
+    weighted_digit_sum: int, vat_digits: list[int], use_9755: bool = False
+) -> bool:
     """
-    Applies the modulus 97 algorithm or the modulus 9755 algorithm to the provided
-    vat digits.
+    Checks the weighted_digit_sum of the first 7 digits of a VAT number against the
+    last 2 digits of the VAT number to determine if the VAT number is valid, using
+    either the modulus 97 algorithm or the modulus 9755 algorithm.
     """
-    # Multiply first seven digits by weights from 8 to 2 and sum them
-    check_digits = 0
-    for i in range(7):
-        check_digits += vat_digits[i] * (8 - i)
-
-    # Optionally add 55 (modulus 9755 algorithm)
+    # Add 55 to the weighted digit sum if we are using the 9755 algorithm
     if use_9755:
-        check_digits += 55
+        weighted_digit_sum += 55
 
     # Subtract 97 until we get a negative number, then take the absolute value
-    check_digits = abs(check_digits - 97 * ceil(check_digits / 97))
+    weighted_digit_sum = abs(weighted_digit_sum - 97 * ceil(weighted_digit_sum / 97))
 
-    # convert summed digits to a list of ints
-    check_digits = [int(char) for char in f"{abs(check_digits):02n}"]
+    # convert zero-padded summed digits to a list of ints
+    weighted_digit_sum = [int(char) for char in f"{abs(weighted_digit_sum):02n}"]
 
     # Check calculated check_digits are the same as the last 2 given vat digits
-    return check_digits == vat_digits[-2:]
+    return weighted_digit_sum == vat_digits[-2:]
 
 
 def get_digits_from_string(vat_number: str) -> list[int]:
@@ -49,10 +47,11 @@ def sum_weighted_digits(vat_digits: list[int]) -> int:
     return check_digits
 
 
-def validate_with_9755_algorithm(vat_number: str) -> bool:
+def validate_vat_number(vat_number: str) -> bool:
     """
-    Runs the 97-55 algorithm for determining vat number validity on a vat number
-    as described here: https://discover.hubpages.com/business/Check-VAT-Numbers-UK
+    Runs both the modulus 97 and the modulus 97-55 algorithm to determine if the given
+    VAT number is valid.
+    As described here: https://discover.hubpages.com/business/Check-VAT-Numbers-UK
     """
     vat_digits = get_digits_from_string(vat_number)
 
@@ -60,9 +59,16 @@ def validate_with_9755_algorithm(vat_number: str) -> bool:
     if len(vat_digits) != 9:
         return False
 
+    # Get the weighted digit sum used by both the modulus 97 and 9755 algorithms
+    weighted_digit_sum = sum_weighted_digits(vat_digits)
+
     # First: run the modulus 97 algorithm to check for validity
-    if _modulus_9755(vat_digits, use_9755=False):
+    if _modulus_9755(
+        weighted_digit_sum=weighted_digit_sum, vat_digits=vat_digits, use_9755=False
+    ):
         return True
 
     # Second: if not valid with modulus 97, then run the modulus 9755 algorithm
-    return _modulus_9755(vat_digits, use_9755=True)
+    return _modulus_9755(
+        weighted_digit_sum=weighted_digit_sum, vat_digits=vat_digits, use_9755=True
+    )
