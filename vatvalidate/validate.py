@@ -18,7 +18,7 @@ def _modulus_9755(vat_digits: list[int], use_9755: bool = False) -> bool:
     check_digits = abs(check_digits)
 
     # convert summed digits to a list of ints
-    check_digits = [int(char) for char in f"{abs(check_digits)}".zfill(2)]
+    check_digits = [int(char) for char in f"{abs(check_digits):02n}"]
 
     # Check calculated check_digits are the same as the last 2 given vat digits
     return check_digits == vat_digits[-2:]
