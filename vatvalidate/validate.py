@@ -1,5 +1,7 @@
 from math import ceil
 
+from vatvalidate.exceptions import InvalidVATDigitsError
+
 
 def _modulus_9755(vat_digits: list[int], use_9755: bool = False) -> bool:
     """
@@ -30,6 +32,21 @@ def get_digits_from_string(vat_number: str) -> list[int]:
     Returns a list of digits from a string, in the order they appear.
     """
     return [int(char) for char in vat_number if char.isdigit()]
+
+
+def sum_weighted_digits(vat_digits: list[int]) -> int:
+    """
+    Multiplies the first seven digits of the VAT number by weights from 8 to 2 & sums
+    them to get a single integer against which we can compare the final two digits of a
+    VAT number to check validity.
+    """
+    if len(vat_digits) != 9:
+        raise InvalidVATDigitsError("VAT number must be 9 digits long.")
+
+    check_digits: int = 0
+    for i in range(7):
+        check_digits += vat_digits[i] * (8 - i)
+    return check_digits
 
 
 def validate_with_9755_algorithm(vat_number: str) -> bool:
