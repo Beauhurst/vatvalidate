@@ -1,9 +1,11 @@
 import pytest
 
+from vatvalidate.exceptions import InvalidVATDigitsError
 from vatvalidate.validate import (
     _modulus_9755,
     get_digits_from_string,
-    validate_with_9755_algorithm,
+    sum_weighted_digits,
+    validate_vat_number,
 )
 
 
@@ -32,65 +34,121 @@ def test_get_digits_from_string(vat_number: str, expected_digits: list[int]) -> 
 
 
 @pytest.mark.parametrize(
-    ("vat_digits", "expected_validity"),
+    "vat_digits",
     [
-        # Valid using the 97 algorithm
-        ([7, 8, 7, 9, 7, 6, 2, 4, 2], True),
-        ([9, 8, 5, 7, 8, 7, 3, 3, 9], True),
-        ([5, 1, 0, 6, 1, 1, 4, 0, 5], True),
-        ([7, 9, 3, 3, 7, 0, 6, 0, 2], True),
-        ([5, 4, 4, 7, 8, 6, 2, 1, 3], True),
-        ([7, 3, 6, 2, 9, 9, 5, 9, 5], True),
-        ([1, 0, 9, 8, 5, 8, 6, 3, 6], True),
-        ([5, 4, 1, 8, 9, 5, 2, 2, 5], True),
-        ([9, 1, 0, 0, 8, 7, 0, 6, 2], True),
-        ([8, 0, 0, 4, 6, 7, 7, 5, 1], True),
-        # Invalid using the 97 algorithm
-        ([3, 4, 4, 6, 4, 4, 7, 8, 8], False),
-        ([2, 5, 8, 7, 6, 6, 6, 4, 8], False),
-        ([2, 0, 8, 5, 9, 6, 0, 9, 3], False),
-        ([2, 7, 5, 0, 1, 5, 0, 2, 5], False),
-        ([3, 8, 6, 5, 5, 4, 4, 5, 5], False),
-        ([4, 1, 4, 7, 1, 5, 4, 1, 4], False),
-        ([1, 9, 6, 5, 6, 9, 7, 3, 9], False),
-        ([3, 6, 0, 4, 0, 9, 3, 2, 0], False),
-        ([3, 5, 6, 3, 9, 4, 6, 6, 6], False),
-        ([4, 3, 7, 5, 5, 4, 5, 7, 4], False),
+        ([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]),  # too long
+        ([1, 2, 8],),  # too short
     ],
 )
-def test_modulus97(vat_digits: list[int], expected_validity: bool) -> None:
-    assert _modulus_9755(vat_digits, use_9755=False) == expected_validity
+def test_sum_weighted_digits_raises_value_error(vat_digits: list[int]) -> None:
+    with pytest.raises(InvalidVATDigitsError):
+        sum_weighted_digits(vat_digits)
 
 
 @pytest.mark.parametrize(
-    ("vat_digits", "expected_validity"),
+    ("vat_digits", "expected_weighted_sum"),
     [
-        # Valid using the 9755 algorithm
-        ([3, 8, 8, 8, 3, 5, 5, 3, 1], True),
-        ([2, 4, 4, 9, 8, 7, 6, 5, 8], True),
-        ([2, 5, 2, 6, 3, 7, 6, 0, 1], True),
-        ([2, 4, 9, 6, 3, 8, 3, 6, 6], True),
-        ([2, 4, 6, 4, 0, 1, 8, 2, 0], True),
-        ([2, 8, 1, 0, 0, 0, 4, 5, 3], True),
-        ([3, 1, 9, 7, 6, 3, 8, 6, 7], True),
-        ([2, 6, 2, 2, 6, 3, 4, 1, 8], True),
-        ([1, 8, 7, 6, 4, 4, 8, 5, 6], True),
-        ([2, 3, 1, 0, 9, 6, 5, 3, 2], True),
-        # Invalid using the 9755 algorithm
-        ([5, 0, 0, 2, 4, 8, 1, 0, 5], False),
-        ([7, 0, 3, 2, 2, 6, 7, 7, 0], False),
-        ([8, 0, 2, 1, 8, 1, 4, 7, 0], False),
-        ([8, 5, 6, 6, 1, 4, 7, 9, 6], False),
-        ([1, 0, 2, 8, 9, 0, 3, 9, 2], False),
-        ([5, 6, 2, 9, 3, 7, 4, 1, 4], False),
-        ([7, 5, 0, 2, 5, 5, 0, 5, 8], False),
-        ([7, 3, 2, 3, 7, 0, 2, 5, 8], False),
-        ([8, 5, 2, 2, 4, 3, 1, 4, 6], False),
-        ([7, 9, 7, 3, 6, 4, 9, 6, 1], False),
+        ([2, 5, 2, 6, 3, 7, 6, 0, 1], 138),
+        ([7, 8, 7, 9, 7, 6, 2, 4, 2], 249),
+        ([9, 8, 5, 7, 8, 7, 3, 3, 9], 252),
+        ([5, 1, 0, 6, 1, 1, 4, 0, 5], 92),
+        ([7, 9, 3, 3, 7, 0, 6, 0, 2], 192),
+        ([5, 4, 4, 7, 8, 6, 2, 1, 3], 181),
+        ([7, 3, 6, 2, 9, 9, 5, 9, 5], 196),
+        ([1, 0, 9, 8, 5, 8, 6, 3, 6], 158),
+        ([5, 4, 1, 8, 9, 5, 2, 2, 5], 169),
+        ([9, 1, 0, 0, 8, 7, 0, 6, 2], 132),
+        ([8, 0, 0, 4, 6, 7, 7, 5, 1], 143),
+        ([3, 4, 4, 6, 4, 4, 7, 8, 8], 148),
+        ([2, 5, 8, 7, 6, 6, 6, 4, 8], 188),
+        ([2, 0, 8, 5, 9, 6, 0, 9, 3], 143),
+        ([2, 7, 5, 0, 1, 5, 0, 2, 5], 114),
+        ([3, 8, 6, 5, 5, 4, 4, 5, 5], 181),
+        ([4, 1, 4, 7, 1, 5, 4, 1, 4], 125),
+        ([1, 9, 6, 5, 6, 9, 7, 3, 9], 197),
+        ([3, 6, 0, 4, 0, 9, 3, 2, 0], 119),
+        ([3, 5, 6, 3, 9, 4, 6, 6, 6], 170),
+        ([4, 3, 7, 5, 5, 4, 5, 7, 4], 162),
     ],
 )
-def test_modulus9755(vat_digits: list[int], expected_validity: bool) -> None:
-    assert _modulus_9755(vat_digits, use_9755=True) == expected_validity
+def test_sum_weighted_digits(vat_digits: list[int], expected_weighted_sum: int) -> None:
+    assert sum_weighted_digits(vat_digits) == expected_weighted_sum
+
+
+@pytest.mark.parametrize(
+    ("weighted_digit_sum", "vat_digits", "expected_validity"),
+    [
+        # Valid using the 97 algorithm
+        (249, [7, 8, 7, 9, 7, 6, 2, 4, 2], True),
+        (252, [9, 8, 5, 7, 8, 7, 3, 3, 9], True),
+        (92, [5, 1, 0, 6, 1, 1, 4, 0, 5], True),
+        (192, [7, 9, 3, 3, 7, 0, 6, 0, 2], True),
+        (181, [5, 4, 4, 7, 8, 6, 2, 1, 3], True),
+        (196, [7, 3, 6, 2, 9, 9, 5, 9, 5], True),
+        (158, [1, 0, 9, 8, 5, 8, 6, 3, 6], True),
+        (169, [5, 4, 1, 8, 9, 5, 2, 2, 5], True),
+        (132, [9, 1, 0, 0, 8, 7, 0, 6, 2], True),
+        (143, [8, 0, 0, 4, 6, 7, 7, 5, 1], True),
+        # Invalid using the 97 algorithm
+        (148, [3, 4, 4, 6, 4, 4, 7, 8, 8], False),
+        (188, [2, 5, 8, 7, 6, 6, 6, 4, 8], False),
+        (143, [2, 0, 8, 5, 9, 6, 0, 9, 3], False),
+        (114, [2, 7, 5, 0, 1, 5, 0, 2, 5], False),
+        (181, [3, 8, 6, 5, 5, 4, 4, 5, 5], False),
+        (125, [4, 1, 4, 7, 1, 5, 4, 1, 4], False),
+        (197, [1, 9, 6, 5, 6, 9, 7, 3, 9], False),
+        (119, [3, 6, 0, 4, 0, 9, 3, 2, 0], False),
+        (170, [3, 5, 6, 3, 9, 4, 6, 6, 6], False),
+        (162, [4, 3, 7, 5, 5, 4, 5, 7, 4], False),
+    ],
+)
+def test_modulus97(
+    weighted_digit_sum: int, vat_digits: list[int], expected_validity: bool
+) -> None:
+    assert (
+        _modulus_9755(
+            weighted_digit_sum=weighted_digit_sum, vat_digits=vat_digits, use_9755=False
+        )
+        == expected_validity
+    )
+
+
+@pytest.mark.parametrize(
+    ("weighted_digit_sum", "vat_digits", "expected_validity"),
+    [
+        # Valid using the 9755 algorithm
+        (205, [3, 8, 8, 8, 3, 5, 5, 3, 1], True),
+        (178, [2, 4, 4, 9, 8, 7, 6, 5, 8], True),
+        (138, [2, 5, 2, 6, 3, 7, 6, 0, 1], True),
+        (170, [2, 4, 9, 6, 3, 8, 3, 6, 6], True),
+        (119, [2, 4, 6, 4, 0, 1, 8, 2, 0], True),
+        (86, [2, 8, 1, 0, 0, 0, 4, 5, 3], True),
+        (169, [3, 1, 9, 7, 6, 3, 8, 6, 7], True),
+        (121, [2, 6, 2, 2, 6, 3, 4, 1, 8], True),
+        (180, [1, 8, 7, 6, 4, 4, 8, 5, 6], True),
+        (107, [2, 3, 1, 0, 9, 6, 5, 3, 2], True),
+        # Invalid using the 9755 algorithm
+        (92, [5, 0, 0, 2, 4, 8, 1, 0, 5], False),
+        (124, [7, 0, 3, 2, 2, 6, 7, 7, 0], False),
+        (124, [8, 0, 2, 1, 8, 1, 4, 7, 0], False),
+        (195, [8, 5, 6, 6, 1, 4, 7, 9, 6], False),
+        (102, [1, 0, 2, 8, 9, 0, 3, 9, 2], False),
+        (180, [5, 6, 2, 9, 3, 7, 4, 1, 4], False),
+        (136, [7, 5, 0, 2, 5, 5, 0, 5, 8], False),
+        (136, [7, 3, 2, 3, 7, 0, 2, 5, 8], False),
+        (148, [8, 5, 2, 2, 4, 3, 1, 4, 6], False),
+        (230, [7, 9, 7, 3, 6, 4, 9, 6, 1], False),
+    ],
+)
+def test_modulus9755(
+    weighted_digit_sum: int, vat_digits: list[int], expected_validity: bool
+) -> None:
+    assert (
+        _modulus_9755(
+            weighted_digit_sum=weighted_digit_sum, vat_digits=vat_digits, use_9755=True
+        )
+        == expected_validity
+    )
 
 
 @pytest.mark.parametrize(
@@ -144,4 +202,4 @@ def test_modulus9755(vat_digits: list[int], expected_validity: bool) -> None:
     ],
 )
 def test_valid_vat_numbers(vat_number: str, expected_validity: bool) -> None:
-    assert validate_with_9755_algorithm(vat_number) == expected_validity
+    assert validate_vat_number(vat_number) == expected_validity
