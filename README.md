@@ -11,3 +11,24 @@ To install `vatvalidate`, simply:
 ``` shell
 $ pip install vatvalidate
 ```
+
+## Usage
+
+Using `validate_vat_number`, you can simply check the validity of vat number strings.
+```python
+from vatvalidate.validate import validate_vat_number
+
+# Validate a vat number using validate_vat_number
+vat_numbers = [
+    "GB424807302",
+    "424807302",
+    "VAT NUMBER: 424807302",
+    "GB279238956",
+    "1234",
+]
+
+print(
+    [validate_vat_number(number) for number in vat_numbers]
+)
+#> [True, True, True, False, False]
+```
