@@ -1,3 +1,6 @@
+from math import ceil
+
+
 def _modulus_9755(vat_digits: list[int], use_9755: bool = False) -> bool:
     """
     Applies the modulus 97 algorithm or the modulus 9755 algorithm to the provided
@@ -13,9 +16,7 @@ def _modulus_9755(vat_digits: list[int], use_9755: bool = False) -> bool:
         check_digits += 55
 
     # Subtract 97 until we get a negative number, then take the absolute value
-    while check_digits > 0:
-        check_digits -= 97
-    check_digits = abs(check_digits)
+    check_digits = abs(check_digits - 97 * ceil(check_digits / 97))
 
     # convert summed digits to a list of ints
     check_digits = [int(char) for char in f"{abs(check_digits):02n}"]
