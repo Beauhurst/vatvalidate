@@ -53,12 +53,11 @@ def validate_vat_number(vat_number: str) -> bool:
     """
     vat_digits = get_digits_from_string(vat_number)
 
-    # If there are not 9 digits then the vat number is not valid
-    if len(vat_digits) != 9:
-        return False
-
     # Get the weighted digit sum used by both the modulus 97 and 9755 algorithms
-    weighted_digit_sum = sum_weighted_digits(vat_digits)
+    try:
+        weighted_digit_sum = sum_weighted_digits(vat_digits)
+    except InvalidVATDigitsError:
+        return False
 
     # First: run the modulus 97 algorithm to check for validity
     if _modulus_9755(
