@@ -1,8 +1,8 @@
 # vatvalidate
 
-Ever wondered if that VAT number is valid? Well, now you can find out thanks to this simple Python package.
+Ever wondered if that VAT number is valid? Well, now you can find out thanks to this simple Python library.
 
-`vatvalidate` implements the modulus 97 and modulus 9755 used to check the validity of VAT numbers in the United Kingdom.
+`vatvalidate` implements the modulus 97 and modulus 9755 used to check the validity of VAT numbers in the United Kingdom. For more info on these algorithms, see [this link](https://discover.hubpages.com/business/Check-VAT-Numbers-UK).
 
 ## Installation
 
