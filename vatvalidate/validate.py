@@ -1,5 +1,3 @@
-from math import ceil
-
 from vatvalidate.exceptions import InvalidVATDigitsError
 
 
@@ -16,7 +14,7 @@ def _modulus_9755(
         weighted_digit_sum += 55
 
     # Subtract 97 until we get a negative number, then take the absolute value
-    weighted_digit_sum = abs(weighted_digit_sum - 97 * ceil(weighted_digit_sum / 97))
+    weighted_digit_sum = 97 - (weighted_digit_sum % 97)
 
     # convert zero-padded summed digits to a list of ints
     weighted_digit_sum = [int(char) for char in f"{abs(weighted_digit_sum):02n}"]
