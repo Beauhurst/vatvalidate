@@ -24,7 +24,7 @@ readme = "README.md"
 python = "^3.8"
 
 [tool.poetry.dev-dependencies]
-black = ">=21.5b1,<24"
+black = ">=21.5b1,<25"
 ipython = ">=7.0,<10"
 mypy = ">=0.901,<2"
 pydantic = "^2.2"
