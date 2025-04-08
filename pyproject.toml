@@ -92,6 +92,7 @@ warn_unused_configs = true
 follow_imports = "normal"
 plugins = ["pydantic.mypy"]
 ignore_missing_imports = true
+packages = ["vatvalidate", "tests"]
 
 [tool.pytest.ini_options]
 minversion = "6.0"

@@ -8,7 +8,7 @@ ruff check .
 ruff format --check .
 
 # mypy
-mypy .
+mypy
 
 # pytest
 pytest .
