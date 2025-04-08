@@ -36,7 +36,9 @@ def test_get_digits_from_string(vat_number: str, expected_digits: list[int]) -> 
 @pytest.mark.parametrize(
     "vat_digits",
     [
-        ([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]),  # too long
+        (
+            [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]  # too long
+        ),
         ([1, 2, 8],),  # too short
     ],
 )

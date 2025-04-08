@@ -4,11 +4,11 @@ set -x -e
 # ruff
 ruff check .
 
-# black
-black --check .
+# Check formatting
+ruff format --check .
 
 # mypy
-mypy -m vatvalidate
+mypy
 
 # pytest
 pytest .

@@ -17,10 +17,13 @@ def _modulus_9755(
     weighted_digit_sum = 97 - (weighted_digit_sum % 97)
 
     # convert zero-padded summed digits to a list of ints
-    weighted_digit_sum = [int(char) for char in f"{abs(weighted_digit_sum):02n}"]
+    weighted_digit_sum_list: list[int] = [
+        int(char) for char in f"{abs(weighted_digit_sum):02n}"
+    ]
 
     # Check calculated check_digits are the same as the last 2 given vat digits
-    return weighted_digit_sum == vat_digits[-2:]
+    last_two_vat_digits: list[int] = vat_digits[-2:]
+    return weighted_digit_sum_list == last_two_vat_digits
 
 
 def get_digits_from_string(vat_number: str) -> list[int]:
