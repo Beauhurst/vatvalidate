@@ -33,9 +33,6 @@ dev = [
     "ruff>=0,<1",
 ]
 
-[tool.uv]
-default-groups = ["dev"]
-
 [tool.hatch.build.targets.sdist]
 include = ["vatvalidate", "vatvalidate/py.typed"]
 
