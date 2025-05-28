@@ -8,15 +8,18 @@ on:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash -l {0}
     continue-on-error: ${{ matrix.experimental }}
-    name: "Build and Test on ${{ matrix.python-version }}, experimental: ${{ matrix.experimental }}"
+    name: 'Build and Test on ${{ matrix.python-version }}, experimental: ${{ matrix.experimental }}'
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.10", "3.11", "3.12"]
-        experimental: [false]
+        python-version: [ '3.10', '3.11', '3.12', '3.13' ]
+        experimental: [ false ]
         # include:
-        #   - python-version: "3.13"
+        #   - python-version: "3.14"
         #     experimental: true
     steps:
       - uses: actions/checkout@v4
