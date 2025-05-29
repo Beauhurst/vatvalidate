@@ -1,9 +1,9 @@
 [project]
 name = "vatvalidate"
-version = "0.0.2"
+version = "0.0.3"
 description = "vatvalidate is a Python library for validating UK VAT numbers."
 authors = [{ name = "Beauhurst Devs", email = "dev@beauhurst.com" }]
-requires-python = ">=3.10,<3.13"
+requires-python = ">=3.11,<3.14"
 readme = "README.md"
 documentation = "https://github.com/Beauhurst/vatvalidate"
 license = "MIT"
@@ -14,20 +14,19 @@ packages = [
 classifiers = [
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3 :: Only",
 ]
 
 [dependency-groups]
 debug = ["jupyter>=1,<2"]
 dev = [
-    "ipython>=8,<9",
-    "mypy>=1,<2",
-    "pytest-cov>=6,<7",
-    "pytest-mock>=3,<4",
-    "pytest>=8,<9",
+    "ipython>=8",
+    "mypy>=1",
+    "pytest-cov>=6",
+    "pytest>=8",
     "ruff>=0,<1",
 ]
 
@@ -42,7 +41,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.ruff]
-target-version = "py38"
+target-version = "py311"
 src = ["vatvalidate", "tests"]
 extend-exclude = [
     ".venv",
