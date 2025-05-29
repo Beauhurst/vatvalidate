@@ -3,7 +3,7 @@ name = "vatvalidate"
 version = "0.0.3"
 description = "vatvalidate is a Python library for validating UK VAT numbers."
 authors = [{ name = "Beauhurst Devs", email = "dev@beauhurst.com" }]
-requires-python = ">=3.10,<3.14"
+requires-python = ">=3.11,<3.14"
 readme = "README.md"
 documentation = "https://github.com/Beauhurst/vatvalidate"
 license = "MIT"
@@ -14,7 +14,6 @@ packages = [
 classifiers = [
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
