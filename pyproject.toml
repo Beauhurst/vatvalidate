@@ -1,9 +1,9 @@
 [project]
 name = "vatvalidate"
-version = "0.0.3"
+version = "0.1.0"
 description = "vatvalidate is a Python library for validating UK VAT numbers."
 authors = [{ name = "Beauhurst Devs", email = "dev@beauhurst.com" }]
-requires-python = ">=3.11,<3.14"
+requires-python = ">=3.11,<3.15"
 readme = "README.md"
 documentation = "https://github.com/Beauhurst/vatvalidate"
 license = "MIT"
@@ -23,9 +23,9 @@ classifiers = [
 [dependency-groups]
 debug = ["jupyter>=1,<2"]
 dev = [
-    "ipython>=8",
+    "ipython>=9",
     "mypy>=1",
-    "pytest-cov>=6",
+    "pytest-cov>=7",
     "pytest>=8",
     "ruff>=0,<1",
 ]
