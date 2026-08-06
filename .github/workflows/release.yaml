@@ -9,16 +9,17 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - name: Install uv and set the python version
-        uses: astral-sh/setup-uv@v5
+      - name: Install uv
+        # No floating v9 tag is published, so this has to be an exact pin.
+        # There is no python-version-file input; uv reads .python-version itself.
+        uses: astral-sh/setup-uv@v9.0.0
         with:
-          python-version-file: ".python-version"
           enable-cache: true
 
       - name: Install the project
-        run: uv sync
+        run: uv sync --locked
 
       - name: Build binary wheel and a source tarball
         run: uv build --package vatvalidate --out-dir dist

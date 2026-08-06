@@ -25,10 +25,10 @@ classifiers = [
 debug = ["jupyter>=1,<2"]
 dev = [
     "ipython>=9",
-    "mypy>=1",
+    "mypy>=2",
     "pytest-cov>=7",
-    "pytest>=8",
-    "ruff>=0,<1",
+    "pytest>=9",
+    "ruff>=0.16,<1",
 ]
 
 [tool.hatch.build.targets.sdist]

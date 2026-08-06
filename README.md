@@ -27,8 +27,6 @@ vat_numbers = [
     "1234",
 ]
 
-print(
-    [validate_vat_number(number) for number in vat_numbers]
-)
-#> [True, True, True, False, False]
+print([validate_vat_number(number) for number in vat_numbers])
+# [True, True, True, False, False]
 ```
