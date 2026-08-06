@@ -27,6 +27,16 @@ from vatvalidate.validate import (
         ("GB2%6£2%26_3+418", [2, 6, 2, 2, 6, 3, 4, 1, 8]),
         ("1,8>7|644|!856", [1, 8, 7, 6, 4, 4, 8, 5, 6]),
         ("231096532 231096532", [2, 3, 1, 0, 9, 6, 5, 3, 2, 2, 3, 1, 0, 9, 6, 5, 3, 2]),
+        # Regression: characters that are `str.isdigit()` but not `str.isdecimal()`
+        # used to raise ValueError, because `int()` cannot convert them. They are
+        # ignored like any other non-decimal character.
+        ("GB1630403²49", [1, 6, 3, 0, 4, 0, 3, 4, 9]),
+        ("²²²", []),
+        ("GB16304034①9", [1, 6, 3, 0, 4, 0, 3, 4, 9]),
+        ("GB½163040349", [1, 6, 3, 0, 4, 0, 3, 4, 9]),
+        ("GB163040349Ⅳ", [1, 6, 3, 0, 4, 0, 3, 4, 9]),
+        # Decimal digits outside ASCII are still converted, as `int()` accepts them
+        ("GB\u0661\u0666\u0663040349", [1, 6, 3, 0, 4, 0, 3, 4, 9]),
     ],
 )
 def test_get_digits_from_string(vat_number: str, expected_digits: list[int]) -> None:
@@ -215,6 +225,13 @@ def test_modulus9755(
         ("Not a VAT Number", False),
         ("000 111", False),
         (" ", False),
+        # Non-decimal "digit" characters are ignored, so these are too short rather
+        # than raising ValueError (regression)
+        ("GB²²²", False),
+        ("²①½Ⅳ", False),
+        # ...and they do not change the outcome for an otherwise valid number
+        ("GB²83092723①1", True),
+        ("GB²74185080①1", False),
         # Valid VAT numbers whose check digits are 00 (regression: these were
         # rejected because an exact multiple of 97 reduced to 97 instead of 0)
         ("GB200394900", True),

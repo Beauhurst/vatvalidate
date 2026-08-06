@@ -31,8 +31,12 @@ def _modulus_9755(
 def get_digits_from_string(vat_number: str) -> list[int]:
     """
     Returns a list of digits from a string, in the order they appear.
+
+    Non-digit characters are ignored. We test with `str.isdecimal()` rather than
+    `str.isdigit()`, because `str.isdigit()` is also true for characters such as
+    superscripts ("²") and circled digits ("①") that `int()` refuses to convert.
     """
-    return [int(char) for char in vat_number if char.isdigit()]
+    return [int(char) for char in vat_number if char.isdecimal()]
 
 
 def sum_weighted_digits(vat_digits: list[int]) -> int:
