@@ -27,6 +27,16 @@ from vatvalidate.validate import (
         ("GB2%6£2%26_3+418", [2, 6, 2, 2, 6, 3, 4, 1, 8]),
         ("1,8>7|644|!856", [1, 8, 7, 6, 4, 4, 8, 5, 6]),
         ("231096532 231096532", [2, 3, 1, 0, 9, 6, 5, 3, 2, 2, 3, 1, 0, 9, 6, 5, 3, 2]),
+        # Regression: characters that are `str.isdigit()` but not `str.isdecimal()`
+        # used to raise ValueError, because `int()` cannot convert them. They are
+        # ignored like any other non-decimal character.
+        ("GB1630403²49", [1, 6, 3, 0, 4, 0, 3, 4, 9]),
+        ("²²²", []),
+        ("GB16304034①9", [1, 6, 3, 0, 4, 0, 3, 4, 9]),
+        ("GB½163040349", [1, 6, 3, 0, 4, 0, 3, 4, 9]),
+        ("GB163040349Ⅳ", [1, 6, 3, 0, 4, 0, 3, 4, 9]),
+        # Decimal digits outside ASCII are still converted, as `int()` accepts them
+        ("GB\u0661\u0666\u0663040349", [1, 6, 3, 0, 4, 0, 3, 4, 9]),
     ],
 )
 def test_get_digits_from_string(vat_number: str, expected_digits: list[int]) -> None:
@@ -102,6 +112,13 @@ def test_sum_weighted_digits(vat_digits: list[int], expected_weighted_sum: int) 
         (119, [3, 6, 0, 4, 0, 9, 3, 2, 0], False),
         (170, [3, 5, 6, 3, 9, 4, 6, 6, 6], False),
         (162, [4, 3, 7, 5, 5, 4, 5, 7, 4], False),
+        # Regression: when the weighted sum is an exact multiple of 97 the expected
+        # check digits are 00, not 97.
+        (97, [2, 0, 0, 3, 9, 4, 9, 0, 0], True),
+        (194, [2, 1, 9, 8, 8, 9, 9, 0, 0], True),
+        (291, [7, 9, 9, 9, 7, 9, 9, 0, 0], True),
+        (97, [2, 0, 0, 3, 9, 4, 9, 9, 7], False),
+        (194, [2, 1, 9, 8, 8, 9, 9, 9, 7], False),
     ],
 )
 def test_modulus97(
@@ -140,6 +157,13 @@ def test_modulus97(
         (136, [7, 3, 2, 3, 7, 0, 2, 5, 8], False),
         (148, [8, 5, 2, 2, 4, 3, 1, 4, 6], False),
         (230, [7, 9, 7, 3, 6, 4, 9, 6, 1], False),
+        # Regression: when the weighted sum plus the 55 offset is an exact multiple
+        # of 97 the expected check digits are 00, not 97.
+        (42, [2, 0, 0, 0, 0, 6, 4, 0, 0], True),
+        (139, [2, 0, 1, 9, 8, 8, 8, 0, 0], True),
+        (236, [2, 8, 9, 7, 8, 9, 8, 0, 0], True),
+        (42, [2, 0, 0, 0, 0, 6, 4, 9, 7], False),
+        (139, [2, 0, 1, 9, 8, 8, 8, 9, 7], False),
     ],
 )
 def test_modulus9755(
@@ -201,6 +225,26 @@ def test_modulus9755(
         ("Not a VAT Number", False),
         ("000 111", False),
         (" ", False),
+        # Non-decimal "digit" characters are ignored, so these are too short rather
+        # than raising ValueError (regression)
+        ("GB²²²", False),
+        ("²①½Ⅳ", False),
+        # ...and they do not change the outcome for an otherwise valid number
+        ("GB²83092723①1", True),
+        ("GB²74185080①1", False),
+        # Valid VAT numbers whose check digits are 00 (regression: these were
+        # rejected because an exact multiple of 97 reduced to 97 instead of 0)
+        ("GB200394900", True),
+        ("GB219889900", True),
+        ("GB799979900", True),
+        ("GB200006400", True),
+        ("GB201988800", True),
+        ("GB289789800", True),
+        # ...and the matching "97" numbers, which were wrongly accepted
+        ("GB200394997", False),
+        ("GB219889997", False),
+        ("GB200006497", False),
+        ("GB201988897", False),
     ],
 )
 def test_valid_vat_numbers(vat_number: str, expected_validity: bool) -> None:

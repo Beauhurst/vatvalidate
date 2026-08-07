@@ -13,12 +13,14 @@ def _modulus_9755(
     if use_9755:
         weighted_digit_sum += 55
 
-    # Subtract 97 until we get a negative number, then take the absolute value
-    weighted_digit_sum = 97 - (weighted_digit_sum % 97)
+    # Subtract 97 until we get zero or a negative number, then take the absolute
+    # value. The outer modulo is what keeps an exact multiple of 97 at 0 instead of
+    # wrapping it round to 97, so that numbers whose check digits are 00 validate.
+    weighted_digit_sum = (97 - weighted_digit_sum % 97) % 97
 
     # convert zero-padded summed digits to a list of ints
     weighted_digit_sum_list: list[int] = [
-        int(char) for char in f"{abs(weighted_digit_sum):02n}"
+        int(char) for char in f"{weighted_digit_sum:02n}"
     ]
 
     # Check calculated check_digits are the same as the last 2 given vat digits
@@ -29,8 +31,12 @@ def _modulus_9755(
 def get_digits_from_string(vat_number: str) -> list[int]:
     """
     Returns a list of digits from a string, in the order they appear.
+
+    Non-digit characters are ignored. We test with `str.isdecimal()` rather than
+    `str.isdigit()`, because `str.isdigit()` is also true for characters such as
+    superscripts ("²") and circled digits ("①") that `int()` refuses to convert.
     """
-    return [int(char) for char in vat_number if char.isdigit()]
+    return [int(char) for char in vat_number if char.isdecimal()]
 
 
 def sum_weighted_digits(vat_digits: list[int]) -> int:
